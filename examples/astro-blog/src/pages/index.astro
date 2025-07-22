@@ -1,0 +1,114 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import { formatDateToISO, formatDateToLocal } from '../utils/date';
+
+const allPosts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+
+const sortedPosts = allPosts.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+---
+
+<Layout title="Blogue Example Blog">
+  <main>
+    <h1>My Blogue Blog</h1>
+    <p>A simple blog powered by Blogue CLI and Astro</p>
+    
+    <section class="posts">
+      <h2>Recent Posts</h2>
+      {sortedPosts.length === 0 ? (
+        <p>No posts found. Create your first post with: <code>blogue new</code></p>
+      ) : (
+        <ul>
+          {sortedPosts.map((post) => (
+            <li>
+              <article>
+                <h3>
+                  <a href={`/blogue/blog/${post.slug}`}>{post.data.title}</a>
+                </h3>
+                <time datetime={formatDateToISO(post.data.date)}>
+                  {formatDateToLocal(post.data.date)}
+                </time>
+                {post.data.description && (
+                  <p>{post.data.description}</p>
+                )}
+                {post.data.tags.length > 0 && (
+                  <div class="tags">
+                    {post.data.tags.map((tag) => (
+                      <span class="tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+  
+  .posts ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .posts li {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+  }
+  
+  .posts h3 {
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .posts h3 a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  .posts h3 a:hover {
+    text-decoration: underline;
+  }
+  
+  time {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .tags {
+    margin-top: 1rem;
+  }
+  
+  .tag {
+    display: inline-block;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+  }
+  
+  code {
+    background: #f4f4f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+</style>

@@ -1,0 +1,42 @@
+{
+  "name": "blogue-monorepo",
+  "version": "1.0.0",
+  "description": "A simple CLI tool for publishing markdown blog posts via GitHub Actions",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:workspaces": "npm run lint --workspaces",
+    "dev": "npm run dev --workspaces",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.31.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-unicorn": "^60.0.0",
+    "eslint-plugin-vitest-globals": "^1.5.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "blog",
+    "markdown",
+    "cli",
+    "github-actions",
+    "publishing"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module"
+}

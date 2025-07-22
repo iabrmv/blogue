@@ -1,0 +1,193 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatDateToISO, formatDateToLocal } from '../../utils/date';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => {
+    return data.draft !== true;
+  });
+  
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: post,
+  }));
+}
+
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content } = await post.render();
+---
+
+<Layout title={`${post.data.title} - Blogue Blog`}>
+  <main>
+    <article class="blog-post">
+      <header class="post-header">
+        <h1>{post.data.title}</h1>
+        <div class="post-meta">
+          <time datetime={formatDateToISO(post.data.date)}>
+            {formatDateToLocal(post.data.date, {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </time>
+          {post.data.author && (
+            <span class="author">by {post.data.author}</span>
+          )}
+        </div>
+        {post.data.description && (
+          <p class="description">{post.data.description}</p>
+        )}
+        {post.data.tags.length > 0 && (
+          <div class="tags">
+            {post.data.tags.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </header>
+      
+      <div class="content">
+        <Content />
+      </div>
+    </article>
+    
+    <nav class="post-nav">
+      <a href="/blogue/blog" class="back-link">← Back to all posts</a>
+    </nav>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .blog-post {
+    background: white;
+  }
+  
+  .post-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e1e8ed;
+  }
+  
+  .post-header h1 {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  .post-meta {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .author {
+    margin-left: 1rem;
+  }
+  
+  .description {
+    font-size: 1.2rem;
+    color: #555;
+    margin: 1.5rem 0;
+    font-style: italic;
+  }
+  
+  .tags {
+    margin-top: 1.5rem;
+  }
+  
+  .tag {
+    display: inline-block;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-right: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+  
+  .content :global(h1),
+  .content :global(h2),
+  .content :global(h3),
+  .content :global(h4),
+  .content :global(h5),
+  .content :global(h6) {
+    color: #2c3e50;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .content :global(p) {
+    margin-bottom: 1.5rem;
+  }
+  
+  .content :global(ul),
+  .content :global(ol) {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+  }
+  
+  .content :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  
+  .content :global(blockquote) {
+    border-left: 4px solid #3498db;
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    color: #666;
+  }
+  
+  .content :global(code) {
+    background: #f4f4f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+  }
+  
+  .content :global(pre) {
+    background: #f8f8f8;
+    padding: 1.5rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+  
+  .content :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+  
+  .post-nav {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e1e8ed;
+  }
+  
+  .back-link {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>

@@ -1,0 +1,350 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { writeFileSync, readFileSync, rmSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
+import { createPost, publishPost, unpublishPost, getPostMeta } from './index.js';
+
+const TEST_DIR = 'test-output';
+
+describe('blogue-core', () => {
+  beforeEach(() => {
+    // Clean up test directory
+    if (existsSync(TEST_DIR)) {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
+    mkdirSync(TEST_DIR, { recursive: true });
+  });
+
+  afterEach(() => {
+    // Clean up after tests
+    if (existsSync(TEST_DIR)) {
+      rmSync(TEST_DIR, { recursive: true, force: true });
+    }
+  });
+
+  describe('createPost', () => {
+    it('should create a blog post with default options', () => {
+      const filePath = createPost({
+        title: 'My Test Post',
+        contentDir: TEST_DIR
+      });
+
+      expect(existsSync(filePath)).toBe(true);
+      expect(filePath).toBe(join(TEST_DIR, 'my-test-post.md'));
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('title: My Test Post');
+      expect(content).toContain('draft: true');
+      expect(content).toContain('# My Test Post');
+      expect(content).toContain('Write your blog post content here...');
+    });
+
+    it('should create a blog post with custom options', () => {
+      const filePath = createPost({
+        title: 'Custom Post',
+        contentDir: TEST_DIR,
+        author: 'John Doe',
+        tags: ['javascript', 'web'],
+        description: 'A test description',
+        draft: false
+      });
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('title: Custom Post');
+      expect(content).toContain('author: John Doe');
+      expect(content).toContain('description: A test description');
+      expect(content).toContain('draft: false');
+      expect(content).toContain('- javascript');
+      expect(content).toContain('- web');
+    });
+
+    it('should create directory if it does not exist', () => {
+      const customDir = join(TEST_DIR, 'nested/path');
+      const filePath = createPost({
+        title: 'Nested Post',
+        contentDir: customDir
+      });
+
+      expect(existsSync(customDir)).toBe(true);
+      expect(existsSync(filePath)).toBe(true);
+    });
+
+    it('should generate proper slugs from titles', () => {
+      const filePath = createPost({
+        title: 'Hello, World! Special Characters & Symbols',
+        contentDir: TEST_DIR
+      });
+
+      expect(filePath).toBe(join(TEST_DIR, 'hello-world-special-characters-and-symbols.md'));
+    });
+
+    it('should include current date in ISO format', () => {
+      const filePath = createPost({
+        title: 'Date Test',
+        contentDir: TEST_DIR
+      });
+
+      const content = readFileSync(filePath, 'utf8');
+      const today = new Date().toISOString().split('T')[0];
+      // Date objects are serialized as unquoted ISO strings when no existing posts are found
+      expect(content).toMatch(new RegExp(`date: ${today}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z`));
+    });
+  });
+
+  describe('publishPost', () => {
+    it('should publish a draft post', () => {
+      const filePath = createPost({
+        title: 'Draft Post',
+        contentDir: TEST_DIR,
+        draft: true
+      });
+
+      publishPost({ filePath });
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('draft: false');
+    });
+
+    it('should update publish date when provided', () => {
+      const filePath = createPost({
+        title: 'Date Update Post',
+        contentDir: TEST_DIR
+      });
+
+      const customDate = new Date('2023-12-25');
+      publishPost({ filePath, publishDate: customDate });
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('draft: false');
+      // Date objects are serialized as unquoted ISO strings
+      expect(content).toContain('date: 2023-12-25T00:00:00.000Z');
+    });
+
+    it('should throw error for non-existent file', () => {
+      expect(() => {
+        publishPost({ filePath: 'non-existent.md' });
+      }).toThrow('File not found: non-existent.md');
+    });
+
+    it('should preserve other frontmatter fields', () => {
+      const filePath = createPost({
+        title: 'Preserve Fields',
+        contentDir: TEST_DIR,
+        author: 'Test Author',
+        tags: ['test']
+      });
+
+      publishPost({ filePath });
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('author: Test Author');
+      expect(content).toContain('- test');
+      expect(content).toContain('draft: false');
+    });
+
+    it('should allow republishing already published posts', () => {
+      const filePath = createPost({
+        title: 'Already Published',
+        contentDir: TEST_DIR,
+        draft: false // Create as already published
+      });
+
+      // Should not throw error when "republishing"
+      expect(() => {
+        publishPost({ filePath });
+      }).not.toThrow();
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('draft: false');
+    });
+
+    it('should update date when republishing with new date', () => {
+      const filePath = createPost({
+        title: 'Republish Date Test',
+        contentDir: TEST_DIR,
+        draft: false
+      });
+
+      const newDate = new Date('2024-01-01');
+      publishPost({ filePath, publishDate: newDate });
+
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('draft: false');
+      // Date objects are serialized as unquoted ISO strings
+      expect(content).toContain('date: 2024-01-01T00:00:00.000Z');
+    });
+
+    it('should preserve content when republishing', () => {
+      const filePath = createPost({
+        title: 'Content Preservation',
+        contentDir: TEST_DIR
+      });
+
+      // Modify content
+      const originalContent = readFileSync(filePath, 'utf8');
+      const modifiedContent = originalContent.replace(
+        'Write your blog post content here...',
+        'This is my custom content!'
+      );
+      writeFileSync(filePath, modifiedContent);
+
+      // Publish
+      publishPost({ filePath });
+
+      // Content should be preserved
+      const finalContent = readFileSync(filePath, 'utf8');
+      expect(finalContent).toContain('This is my custom content!');
+      expect(finalContent).toContain('draft: false');
+    });
+  });
+
+  describe('unpublishPost', () => {
+    it('should set draft to true for a published post', () => {
+      const filePath = createPost({
+        title: 'Test Published Post',
+        contentDir: TEST_DIR,
+        draft: false
+      });
+      
+      // Verify it's published
+      let meta = getPostMeta(filePath);
+      expect((meta as any).draft).toBe(false);
+      
+      // Unpublish it
+      unpublishPost({ filePath });
+      
+      // Verify it's now a draft
+      meta = getPostMeta(filePath);
+      expect((meta as any).draft).toBe(true);
+    });
+    
+    it('should set published to false for Jekyll-style posts', () => {
+      // Create a post with published field instead of draft
+      const slug = 'test-jekyll-post';
+      const content = `---
+title: Test Jekyll Post
+date: 2024-01-01
+published: true
+---
+
+Test content`;
+      
+      const filePath = join(TEST_DIR, `${slug}.md`);
+      writeFileSync(filePath, content);
+      
+      // Unpublish it
+      unpublishPost({ filePath });
+      
+      // Verify both fields are set correctly
+      const updated = getPostMeta(filePath) as any;
+      expect(updated.draft).toBe(true);
+      expect(updated.published).toBe(false);
+    });
+    
+    it('should throw error for non-existent file', () => {
+      expect(() => unpublishPost({ filePath: '/non/existent/file.md' }))
+        .toThrow('File not found: /non/existent/file.md');
+    });
+    
+    it('should preserve other frontmatter fields when unpublishing', () => {
+      const filePath = createPost({
+        title: 'Preserve Fields',
+        contentDir: TEST_DIR,
+        author: 'Test Author',
+        tags: ['test'],
+        draft: false
+      });
+      
+      unpublishPost({ filePath });
+      
+      const content = readFileSync(filePath, 'utf8');
+      expect(content).toContain('author: Test Author');
+      expect(content).toContain('- test');
+      expect(content).toContain('draft: true');
+    });
+  });
+
+  describe('getPostMeta', () => {
+    it('should extract metadata from a post', () => {
+      const filePath = createPost({
+        title: 'Meta Test Post',
+        contentDir: TEST_DIR,
+        author: 'Meta Author',
+        tags: ['meta', 'test'],
+        description: 'Meta description'
+      });
+
+      const meta = getPostMeta(filePath);
+
+      expect(meta.title).toBe('Meta Test Post');
+      expect(meta.author).toBe('Meta Author');
+      expect(meta.tags).toEqual(['meta', 'test']);
+      expect(meta.description).toBe('Meta description');
+      expect(meta.draft).toBe(true);
+      expect(meta.slug).toBe('meta-test-post');
+    });
+
+    it('should include generated slug', () => {
+      const filePath = createPost({
+        title: 'Slug Generation Test!',
+        contentDir: TEST_DIR
+      });
+
+      const meta = getPostMeta(filePath);
+      expect(meta.slug).toBe('slug-generation-test');
+    });
+
+    it('should throw error for non-existent file', () => {
+      expect(() => {
+        getPostMeta('non-existent.md');
+      }).toThrow('File not found: non-existent.md');
+    });
+
+    it('should handle posts with minimal frontmatter', () => {
+      const filePath = join(TEST_DIR, 'minimal.md');
+      writeFileSync(filePath, `---
+title: Minimal Post
+---
+# Content`);
+
+      const meta = getPostMeta(filePath);
+      expect(meta.title).toBe('Minimal Post');
+      expect(meta.slug).toBe('minimal-post');
+    });
+
+    it('should handle empty title gracefully', () => {
+      const filePath = join(TEST_DIR, 'no-title.md');
+      writeFileSync(filePath, `---
+author: Test
+---
+# Content`);
+
+      const meta = getPostMeta(filePath);
+      expect(meta.slug).toBe('');
+    });
+  });
+
+  describe('integration tests', () => {
+    it('should support full workflow: create -> get meta -> publish', () => {
+      // Create post
+      const filePath = createPost({
+        title: 'Integration Test',
+        contentDir: TEST_DIR,
+        author: 'Test User',
+        description: 'Full workflow test'
+      });
+
+      // Get metadata
+      const meta = getPostMeta(filePath);
+      expect(meta.title).toBe('Integration Test');
+      expect(meta.draft).toBe(true);
+
+      // Publish
+      publishPost({ filePath });
+
+      // Verify published
+      const publishedMeta = getPostMeta(filePath);
+      expect(publishedMeta.draft).toBe(false);
+      expect(publishedMeta.title).toBe('Integration Test');
+    });
+  });
+});

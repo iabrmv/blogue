@@ -1,0 +1,55 @@
+{
+  "name": "@blogue/core",
+  "version": "0.1.0",
+  "description": "Core functionality for the Blogue CLI tool",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*",
+    "!dist/__tests__"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src && tsc --noEmit",
+    "lint:fix": "eslint src --fix"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.28.0",
+    "@babel/traverse": "^7.28.0",
+    "@babel/types": "^7.28.1",
+    "gray-matter": "^4.0.3",
+    "slugify": "^1.6.6",
+    "zod-to-json-schema": "^3.24.6"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.7",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "blog",
+    "markdown",
+    "frontmatter"
+  ],
+  "license": "MIT",
+  "author": "Ivan Abramov",
+  "homepage": "https://github.com/iabrmv/blogue#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iabrmv/blogue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iabrmv/blogue/issues"
+  }
+}

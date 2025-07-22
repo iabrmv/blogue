@@ -1,0 +1,122 @@
+---
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="A blog powered by Blogue CLI and Astro" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo512.png" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/blogue/" class="logo">Blogue Blog</a>
+        <ul>
+          <li><a href="/blogue/">Home</a></li>
+          <li><a href="/blogue/blog">All Posts</a></li>
+        </ul>
+      </nav>
+    </header>
+    
+    <slot />
+    
+    <footer>
+      <p>Powered by <a href="https://github.com/iabrmv/blogue">Blogue CLI</a> and <a href="https://astro.build">Astro</a></p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  header {
+    background: #fff;
+    border-bottom: 1px solid #e1e8ed;
+    padding: 1rem 0;
+  }
+  
+  nav {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+    text-decoration: none;
+  }
+  
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem;
+  }
+  
+  nav a {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  nav a:hover {
+    color: #3498db;
+  }
+  
+  main {
+    flex: 1;
+  }
+  
+  footer {
+    background: #f8f9fa;
+    text-align: center;
+    padding: 2rem;
+    margin-top: 4rem;
+    border-top: 1px solid #e1e8ed;
+  }
+  
+  footer p {
+    margin: 0;
+    color: #666;
+  }
+  
+  footer a {
+    color: #3498db;
+    text-decoration: none;
+  }
+  
+  footer a:hover {
+    text-decoration: underline;
+  }
+</style>

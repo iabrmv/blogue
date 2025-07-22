@@ -1,0 +1,143 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatDateToISO, formatDateToLocal } from '../../utils/date';
+
+const allPosts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+
+const sortedPosts = allPosts.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+---
+
+<Layout title="All Posts - Blogue Blog">
+  <main>
+    <h1>All Posts</h1>
+    
+    {sortedPosts.length === 0 ? (
+      <div class="empty-state">
+        <p>No published posts yet.</p>
+        <p>Create your first post with:</p>
+        <code>blogue new</code>
+        <p>Then publish it with:</p>
+        <code>blogue publish</code>
+      </div>
+    ) : (
+      <div class="posts-grid">
+        {sortedPosts.map((post) => (
+          <article class="post-card">
+            <h2>
+              <a href={`/blogue/blog/${post.slug}`}>{post.data.title}</a>
+            </h2>
+            <div class="post-meta">
+              <time datetime={formatDateToISO(post.data.date)}>
+                {formatDateToLocal(post.data.date)}
+              </time>
+              {post.data.author && (
+                <span class="author">by {post.data.author}</span>
+              )}
+            </div>
+            {post.data.description && (
+              <p class="description">{post.data.description}</p>
+            )}
+            {post.data.tags.length > 0 && (
+              <div class="tags">
+                {post.data.tags.map((tag) => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
+    )}
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    margin-bottom: 2rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+  
+  .empty-state code {
+    display: block;
+    background: #e9ecef;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin: 1rem auto;
+    max-width: fit-content;
+    font-family: monospace;
+  }
+  
+  .posts-grid {
+    display: grid;
+    gap: 2rem;
+  }
+  
+  .post-card {
+    padding: 2rem;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    transition: box-shadow 0.2s;
+  }
+  
+  .post-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .post-card h2 {
+    margin: 0 0 1rem 0;
+  }
+  
+  .post-card h2 a {
+    color: #2c3e50;
+    text-decoration: none;
+  }
+  
+  .post-card h2 a:hover {
+    color: #3498db;
+  }
+  
+  .post-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .author {
+    margin-left: 1rem;
+  }
+  
+  .description {
+    color: #555;
+    margin-bottom: 1rem;
+  }
+  
+  .tags {
+    margin-top: 1rem;
+  }
+  
+  .tag {
+    display: inline-block;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+  }
+</style>

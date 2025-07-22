@@ -1,0 +1,11 @@
+{
+  "name": "simple-markdown-example",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "echo 'Simple markdown blog - no build step needed'"
+  },
+  "devDependencies": {
+    "@blogue/cli": "file:../../packages/blogue-cli"
+  }
+}
