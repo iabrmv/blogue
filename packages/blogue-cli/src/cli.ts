@@ -3,8 +3,10 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import { createPost, publishPost, unpublishPost, getPostMeta, validatePost, detectFrontmatterPattern, detectFramework, AstroCollection } from '@blogue/core';
 import { existsSync, readdirSync } from 'fs';
-import { join, extname } from 'path';
+import { join, extname, dirname } from 'path';
 import { GitManager, PublishState } from './git-utils.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 
 interface CreateOptions {
   dir: string;
@@ -294,12 +296,17 @@ async function setupAutoMerge(gitManager: GitManager, prNumber: number): Promise
   }
 }
 
+// Read version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+
 const program = new Command();
 
 program
   .name('blogue')
   .description('A simple CLI tool for publishing markdown blog posts')
-  .version('1.0.0');
+  .version(packageJson.version);
 
 program
   .command('new')
