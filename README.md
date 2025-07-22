@@ -64,17 +64,6 @@ Blogue assumes your project has automated deployment configured to trigger on pu
 When Blogue publishes a post, it creates a PR that merges to your default branch, triggering your deployment automatically.
 </details>
 
-**Deployment Setup:**
-Blogue assumes your project has automated deployment configured to trigger on pushes to your default Git branch (usually `main` or `master`). This is common with platforms like:
-- **Vercel** - Auto-deploys from GitHub on push
-- **Netlify** - Continuous deployment from Git
-- **GitHub Pages** - GitHub Actions workflow on push
-- **AWS Amplify** - Git-based deployment
-
-When Blogue publishes a post, it creates a PR that merges to your default branch, triggering your deployment automatically.
-
-</details>
-
 ## Installation
 
 ```bash
