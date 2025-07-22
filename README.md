@@ -10,8 +10,7 @@ A CLI tool for creating and managing markdown blog posts with Astro integration 
 - **TypeScript** - Full type safety throughout the codebase
 - **Multi-collection** - Supports Astro's multiple content collections
 
-<details>
-<summary>## Prerequisites</summary>
+## Prerequisites
 
 <details>
 <summary>
@@ -63,17 +62,6 @@ Blogue assumes your project has automated deployment configured to trigger on pu
 - **AWS Amplify** - Git-based deployment
 
 When Blogue publishes a post, it creates a PR that merges to your default branch, triggering your deployment automatically.
-</details>
-
-**Deployment Setup:**
-Blogue assumes your project has automated deployment configured to trigger on pushes to your default Git branch (usually `main` or `master`). This is common with platforms like:
-- **Vercel** - Auto-deploys from GitHub on push
-- **Netlify** - Continuous deployment from Git
-- **GitHub Pages** - GitHub Actions workflow on push
-- **AWS Amplify** - Git-based deployment
-
-When Blogue publishes a post, it creates a PR that merges to your default branch, triggering your deployment automatically.
-
 </details>
 
 ## Installation
@@ -230,99 +218,14 @@ Requires `gh` CLI tool. When publishing:
 gh auth login
 ```
 
-## Architecture
 
-```
-packages/
-├── @blogue/core/
-│   ├── framework-detection.ts    # Detects Astro, reads package.json
-│   ├── astro-schema-analyzer.ts  # Babel AST → Zod → JSON Schema  
-│   ├── pattern-detection.ts      # Frequency analysis of existing posts
-│   └── index.ts                  # createPost, publishPost, etc.
-│
-└── blogue-cli/
-    ├── cli.ts                    # Commander.js commands
-    ├── git-utils.ts             # simple-git + gh CLI integration
-    └── field-collection.ts      # inquirer.js prompts
-```
-
-Dependencies:
+## Dependencies:
 - `@babel/parser` + `@babel/traverse` - Parse TypeScript AST
 - `zod-to-json-schema` - Convert Zod schemas to JSON
 - `gray-matter` - YAML frontmatter parsing
 - `simple-git` - Git operations
 - `inquirer` - Interactive prompts
 
-## Development
-### Setup
-
-```bash
-git clone https://github.com/iabrmv/blogue.git
-cd blogue
-npm install
-npm run build
-```
-
-### Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run linting
-npm run lint
-
-# Run tests in watch mode
-cd packages/blogue-core && npm run test:watch
-```
-
-### Local Development
-
-```bash
-# Build in watch mode
-npm run dev
-
-# Link for local testing
-cd packages/blogue-cli
-npm link
-
-# Test locally
-blogue new "Test Post" --verbose
-
-# Test in example projects
-cd examples/astro-blog
-blogue new --collection "blog"
-```
-
-### Architecture Deep Dive
-
-```bash
-packages/
-├── @blogue/core/           # Core functionality
-│   ├── src/
-│   │   ├── index.ts                    # Main API exports
-│   │   ├── framework-detection.ts     # Auto-detect frameworks
-│   │   ├── astro-schema-analyzer.ts   # Astro Zod schema parsing
-│   │   ├── pattern-detection.ts       # Learn from existing posts
-│   │   ├── schema-introspection.ts    # Zod schema introspection
-│   │   └── validation.ts              # Post validation
-│   └── tests/                          # Comprehensive test suite
-│
-└── blogue-cli/            # CLI interface
-    ├── src/
-    │   ├── cli.ts                      # Main CLI commands
-    │   ├── git-utils.ts               # GitHub integration
-    │   └── field-collection.ts        # Interactive prompts
-    └── bin/blogue.js                   # Executable entry point
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
 ## License
 
 MIT
@@ -331,8 +234,8 @@ MIT
 
 - No CMS database/admin panel to maintain
 - Git-based workflow fits existing development process  
-- Astro content collections can be complex to manage manually
-- Pattern detection saves time when adding posts to existing blogs
+- Saves time due to automatic branching/PR merges
+- Keeps clean git PR history
 - CI integration catches build errors before they reach production
 
 For developers who prefer markdown + git over WordPress/Ghost/etc.
