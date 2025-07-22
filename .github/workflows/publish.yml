@@ -19,7 +19,10 @@ jobs:
           cache: 'npm'
       
       - run: npm ci
-      - run: npm run build
+      - name: Build blogue-core first
+        run: npm run build --workspace=packages/blogue-core
+      - name: Build blogue-cli
+        run: npm run build --workspace=packages/blogue-cli
       - run: npm run test
       - run: npm run lint
 
@@ -36,7 +39,10 @@ jobs:
           cache: 'npm'
       
       - run: npm ci
-      - run: npm run build
+      - name: Build blogue-core first
+        run: npm run build --workspace=packages/blogue-core
+      - name: Build blogue-cli
+        run: npm run build --workspace=packages/blogue-cli
       
       - name: Publish blogue-core
         run: cd packages/blogue-core && npm publish --access public
