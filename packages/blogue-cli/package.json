@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc && chmod +x bin/blogue.js",
     "dev": "tsc --watch",
-    "test": "vitest",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src && tsc --noEmit",
     "lint:fix": "eslint src --fix"
   },
